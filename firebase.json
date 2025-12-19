@@ -1,1 +1,17 @@
-{"hosting":{"public":".","ignore":[]}}
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/",
+        "destination": "/cover.html"
+      }
+    ]
+  }
+}
+
