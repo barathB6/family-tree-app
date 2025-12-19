@@ -1,0 +1,275 @@
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
+
+body { 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container { 
+  max-width: 1400px; 
+  margin: auto;
+}
+
+.header {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+h1 { 
+  text-align: center;
+  color: #667eea;
+  margin-bottom: 5px;
+  font-size: 2.5em;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+button { 
+  padding: 12px 24px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background: #667eea;
+  color: white;
+  transition: all 0.3s;
+  font-weight: 600;
+}
+
+button:hover { 
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.auth-section {
+  text-align: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.user-profile img { 
+  border-radius: 50%;
+  border: 3px solid #667eea;
+}
+
+.add-member-section {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+  font-weight: 600;
+}
+
+.form-group input, 
+.form-group textarea, 
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus, 
+.form-group textarea:focus, 
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* BUBBLE LAYOUT STYLES */
+.tree-canvas {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  min-height: 600px;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  padding: 10px;
+  text-align: center;
+  user-select: none;
+}
+
+.bubble:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+.bubble.dragging {
+  opacity: 0.7;
+  z-index: 100;
+}
+
+.bubble-name {
+  font-weight: bold;
+  color: white;
+  font-size: 14px;
+  margin-bottom: 3px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.bubble-relation {
+  font-size: 11px;
+  color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bubble-year {
+  font-size: 10px;
+  color: rgba(255,255,255,0.8);
+  margin-top: 2px;
+}
+
+.bubble-delete {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.bubble:hover .bubble-delete {
+  display: flex;
+}
+
+.bubble-delete:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+/* Relation Colors */
+.relation-parent { 
+  background: linear-gradient(135deg, #3498db, #2980b9); 
+}
+
+.relation-child { 
+  background: linear-gradient(135deg, #2ecc71, #27ae60); 
+}
+
+.relation-sibling { 
+  background: linear-gradient(135deg, #f39c12, #e67e22); 
+}
+
+.relation-grandparent { 
+  background: linear-gradient(135deg, #9b59b6, #8e44ad); 
+}
+
+.relation-grandchild { 
+  background: linear-gradient(135deg, #1abc9c, #16a085); 
+}
+
+.relation-spouse { 
+  background: linear-gradient(135deg, #e74c3c, #c0392b); 
+}
+
+.relation-aunt-uncle { 
+  background: linear-gradient(135deg, #34495e, #2c3e50); 
+}
+
+.relation-cousin { 
+  background: linear-gradient(135deg, #f1c40f, #f39c12); 
+}
+
+.relation-other { 
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d); 
+}
+
+.hidden { 
+  display: none; 
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 18px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 18px;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.instructions {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+  color: #856404;
+  text-align: center;
+}
