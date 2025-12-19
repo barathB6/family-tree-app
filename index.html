@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roots – Family Tree</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { 
+      max-width: 1400px; 
+      margin: auto;
+    }
+    .header {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    h1 { 
+      text-align: center;
+      color: #667eea;
+      margin-bottom: 5px;
+      font-size: 2.5em;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    button { 
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background: #667eea;
+      color: white;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+    button:hover { 
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    .auth-section {
+      text-align: center;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    .user-profile img { 
+      border-radius: 50%;
+      border: 3px solid #667eea;
+    }
+    .add-member-section {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: 600;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    /* BUBBLE LAYOUT STYLES */
+    .tree-canvas {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      min-height: 600px;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .bubble {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: move;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      padding: 10px;
+      text-align: center;
+      user-select: none;
+    }
+    .bubble:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      z-index: 10;
+    }
+    .bubble.dragging {
+      opacity: 0.7;
+      z-index: 100;
+    }
+    .bubble-name {
+      font-weight: bold;
+      color: white;
+      font-size: 14px;
+      margin-bottom: 3px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .bubble-relation {
+      font-size: 11px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .bubble-year {
+      font-size: 10px;
+      color: rgba(255,255,255,0.8);
+      margin-top: 2px;
+    }
+    .bubble-delete {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(231, 76, 60, 0.9);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .bubble:hover .bubble-delete {
+      display: flex;
+    }
+    .bubble-delete:hover {
+      background: #c0392b;
+      transform: scale(1.1);
+    }
+    
+    /* Relation Colors */
+    .relation-parent { background: linear-gradient(135deg, #3498db, #2980b9); }
+    .relation-child { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+    .relation-sibling { background: linear-gradient(135deg, #f39c12, #e67e22); }
+    .relation-grandparent { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+    .relation-grandchild { background: linear-gradient(135deg, #1abc9c, #16a085); }
+    .relation-spouse { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    .relation-aunt-uncle { background: linear-gradient(135deg, #34495e, #2c3e50); }
+    .relation-cousin { background: linear-gradient(135deg, #f1c40f, #f39c12); }
+    .relation-other { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
+    
+    .hidden { display: none; }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 18px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+      font-size: 18px;
+    }
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    
+    .instructions {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #856404;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🌳 Roots</h1>
+      <p class="subtitle">Your private digital family tree</p>
+
+      <div class="auth-section">
+        <div id="loginSection">
+          <button id="loginBtn">🔐 Sign in with Google</button>
+        </div>
+        <div id="userSection" class="hidden">
+          <div class="user-profile">
+            <img id="userPhoto" width="50" />
+            <div>
+              <strong id="userName"></strong>
+              <br>
+              <button id="logoutBtn" style="margin-top: 8px; font-size: 14px; padding: 6px 12px;">Sign out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="appSection" class="hidden">
+      <div class="add-member-section">
+        <h2 style="margin-bottom: 20px; color: #333;">➕ Add Family Member</h2>
+        <form id="addMemberForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Name *</label>
+              <input type="text" id="memberName" required placeholder="John Doe" />
+            </div>
+            <div class="form-group">
+              <label>Relation *</label>
+              <select id="memberRelation" required>
+                <option value="">Select...</option>
+                <option value="Parent">Parent</option>
+                <option value="Child">Child</option>
+                <option value="Sibling">Sibling</option>
+                <option value="Grandparent">Grandparent</option>
+                <option value="Grandchild">Grandchild</option>
+                <option value="Spouse">Spouse</option>
+                <option value="Aunt/Uncle">Aunt/Uncle</option>
+                <option value="Cousin">Cousin</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Birth Year (optional)</label>
+            <input type="number" id="memberBirthYear" placeholder="1985" min="1900" max="2025" />
+          </div>
+          <div class="form-group">
+            <label>Notes (optional)</label>
+            <textarea id="memberNotes" rows="2" placeholder="Any special memories or details..."></textarea>
+          </div>
+          <button type="submit">Add to Family Tree</button>
+        </form>
+      </div>
+
+      <div class="instructions">
+        💡 <strong>Tip:</strong> Drag the bubbles to arrange your family tree! Different colors represent different relationships.
+      </div>
+
+      <div class="tree-canvas" id="treeCanvas">
+        <div id="loadingMessage" class="loading">Loading your family tree...</div>
+        <div id="emptyState" class="empty-state hidden">
+          <div class="empty-state-icon">🌱</div>
+          <p>No family members yet.<br>Add your first one above to start building your tree!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDsVD5CKcBo-NnIcK6JyMnv_2Ag450Qse8",
+      authDomain: "family-tree-app-123.firebaseapp.com",
+      projectId: "family-tree-app-123",
+      storageBucket: "family-tree-app-123.firebasestorage.app",
+      messagingSenderId: "448026364942",
+      appId: "1:448026364942:web:6da1f603ee218a5dff005f",
+      measurementId: "G-Q2RN0JM345"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const loginSection = document.getElementById("loginSection");
+    const userSection = document.getElementById("userSection");
+    const appSection = document.getElementById("appSection");
+    const userPhoto = document.getElementById("userPhoto");
+    const userName = document.getElementById("userName");
+    const addMemberForm = document.getElementById("addMemberForm");
+    const treeCanvas = document.getElementById("treeCanvas");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const emptyState = document.getElementById("emptyState");
+
+    let currentUser = null;
+    let members = [];
+
+    // Sign in
+    loginBtn.addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+          console.error("Login error:", err);
+        }
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => signOut(auth));
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        loginSection.classList.add("hidden");
+        userSection.classList.remove("hidden");
+        appSection.classList.remove("hidden");
+        userPhoto.src = user.photoURL;
+        userName.textContent = user.displayName;
+        await loadFamilyTree();
+      } else {
+        currentUser = null;
+        loginSection.classList.remove("hidden");
+        userSection.classList.add("hidden");
+        appSection.classList.add("hidden");
+        clearCanvas();
+      }
+    });
+
+    // Add family member
+    addMemberForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById("memberName").value.trim();
+      const relation = document.getElementById("memberRelation").value;
+      const birthYear = document.getElementById("memberBirthYear").value;
+      const notes = document.getElementById("memberNotes").value.trim();
+
+      if (!name || !relation) {
+        alert("Please fill in required fields");
+        return;
+      }
+
+      try {
+        // Better initial positioning - spread bubbles out in a grid pattern
+        const canvasWidth = treeCanvas.offsetWidth - 150;
+        const canvasHeight = treeCanvas.offsetHeight - 150;
+        
+        // Count existing members to position new one
+        const existingCount = members.length;
+        const cols = Math.ceil(Math.sqrt(existingCount + 1));
+        const row = Math.floor(existingCount / cols);
+        const col = existingCount % cols;
+        
+        const x = 100 + (col * (canvasWidth / cols));
+        const y = 100 + (row * (canvasHeight / Math.ceil((existingCount + 1) / cols)));
+
+        await addDoc(collection(db, "familyMembers"), {
+          userId: currentUser.uid,
+          name: name,
+          relation: relation,
+          birthYear: birthYear || null,
+          notes: notes || "",
+          posX: x,
+          posY: y,
+          createdAt: new Date().toISOString()
+        });
+
+        addMemberForm.reset();
+        await loadFamilyTree();
+      } catch (err) {
+        console.error("Error adding member:", err);
+        alert("Failed to add member: " + err.message);
+      }
+    });
+
+    // Load family tree
+    async function loadFamilyTree() {
+      loadingMessage.style.display = "block";
+      emptyState.classList.add("hidden");
+      clearCanvas();
+
+      try {
+        const q = query(
+          collection(db, "familyMembers"),
+          where("userId", "==", currentUser.uid)
+        );
+        
+        const snapshot = await getDocs(q);
+        loadingMessage.style.display = "none";
+
+        if (snapshot.empty) {
+          emptyState.classList.remove("hidden");
+          return;
+        }
+
+        members = [];
+        snapshot.forEach((docSnap) => {
+          members.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        renderBubbles();
+
+      } catch (err) {
+        console.error("Error loading family tree:", err);
+        loadingMessage.textContent = "Error loading: " + err.message;
+      }
+    }
+
+    function clearCanvas() {
+      const bubbles = treeCanvas.querySelectorAll('.bubble');
+      bubbles.forEach(b => b.remove());
+    }
+
+    function renderBubbles() {
+      clearCanvas();
+      
+      members.forEach(member => {
+        createBubble(member);
+      });
+    }
+
+    function createBubble(member) {
+      const bubble = document.createElement("div");
+      bubble.className = `bubble relation-${member.relation.toLowerCase().replace('/', '-')}`;
+      bubble.dataset.id = member.id;
+      bubble.style.left = `${member.posX || 100}px`;
+      bubble.style.top = `${member.posY || 100}px`;
+      
+      bubble.innerHTML = `
+        <button class="bubble-delete" data-id="${member.id}">×</button>
+        <div class="bubble-name">${member.name}</div>
+        <div class="bubble-relation">${member.relation}</div>
+        ${member.birthYear ? `<div class="bubble-year">Born ${member.birthYear}</div>` : ''}
+      `;
+
+      // Delete functionality
+      bubble.querySelector('.bubble-delete').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete ${member.name}?`)) {
+          try {
+            await deleteDoc(doc(db, "familyMembers", member.id));
+            await loadFamilyTree();
+          } catch (err) {
+            console.error("Delete error:", err);
+          }
+        }
+      });
+
+      // Drag functionality
+      makeDraggable(bubble, member.id);
+      
+      treeCanvas.appendChild(bubble);
+    }
+
+    function makeDraggable(bubble, memberId) {
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+      let currentX, currentY;
+
+      const onMouseDown = (e) => {
+        if (e.target.classList.contains('bubble-delete')) return;
+        
+        isDragging = true;
+        bubble.classList.add('dragging');
+        bubble.style.zIndex = '1000';
+        
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = parseInt(bubble.style.left) || 0;
+        initialTop = parseInt(bubble.style.top) || 0;
+
+        e.preventDefault();
+        e.stopPropagation();
+      };
+
+      const onMouseMove = (e) => {
+        if (!isDragging) return;
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        currentX = initialLeft + dx;
+        currentY = initialTop + dy;
+
+        // Keep bubble inside canvas
+        const maxX = treeCanvas.offsetWidth - bubble.offsetWidth;
+        const maxY = treeCanvas.offsetHeight - bubble.offsetHeight;
+        
+        currentX = Math.max(0, Math.min(currentX, maxX));
+        currentY = Math.max(0, Math.min(currentY, maxY));
+
+        bubble.style.left = `${currentX}px`;
+        bubble.style.top = `${currentY}px`;
+      };
+
+      const onMouseUp = async () => {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        bubble.classList.remove('dragging');
+        bubble.style.zIndex = '1';
+
+        // Save new position to Firestore
+        try {
+          await updateDoc(doc(db, "familyMembers", memberId), {
+            posX: currentX,
+            posY: currentY
+          });
+          console.log('Position saved:', currentX, currentY);
+        } catch (err) {
+          console.error("Error saving position:", err);
+        }
+      };
+
+      bubble.addEventListener('mousedown', onMouseDown);
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    }
+  </script>
+</body>
+</html>
