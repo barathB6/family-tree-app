@@ -6,7 +6,7 @@
 
 body { 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f5f5f5; /* Light gray background */
   min-height: 100vh;
   padding: 20px;
 }
@@ -272,4 +272,19 @@ button:hover {
   margin-bottom: 20px;
   color: #856404;
   text-align: center;
+}
+
+/* 3D Tree Canvas */
+#tree3d {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body {
+  position: relative;
 }
