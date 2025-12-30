@@ -1,3 +1,5 @@
+import { initCamera, getSelectedPhoto, clearSelectedPhoto } from './camera-base64.js';
+
 // Firebase SDK imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
@@ -53,6 +55,8 @@ logoutBtn.addEventListener("click", () => signOut(auth));
 
 // Auth state observer
 onAuthStateChanged(auth, async (user) => {
+  // Initialize camera
+  initCamera();
   if (user) {
     currentUser = user;
     loginSection.classList.add("hidden");
@@ -78,6 +82,7 @@ addMemberForm.addEventListener("submit", async (e) => {
   const relation = document.getElementById("memberRelation").value;
   const birthYear = document.getElementById("memberBirthYear").value;
   const notes = document.getElementById("memberNotes").value.trim();
+  const photoBase64 = getSelectedPhoto();
 
   if (!name || !relation) {
     alert("Please fill in required fields");
@@ -85,11 +90,9 @@ addMemberForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    // Better initial positioning - spread bubbles out in a grid pattern
     const canvasWidth = treeCanvas.offsetWidth - 150;
     const canvasHeight = treeCanvas.offsetHeight - 150;
     
-    // Count existing members to position new one
     const existingCount = members.length;
     const cols = Math.ceil(Math.sqrt(existingCount + 1));
     const row = Math.floor(existingCount / cols);
@@ -104,12 +107,14 @@ addMemberForm.addEventListener("submit", async (e) => {
       relation: relation,
       birthYear: birthYear || null,
       notes: notes || "",
+      photoURL: photoBase64 || null, // Store base64 directly
       posX: x,
       posY: y,
       createdAt: new Date().toISOString()
     });
 
     addMemberForm.reset();
+    clearSelectedPhoto();
     await loadFamilyTree();
   } catch (err) {
     console.error("Error adding member:", err);
@@ -172,10 +177,14 @@ function createBubble(member) {
   
   bubble.innerHTML = `
     <button class="bubble-delete" data-id="${member.id}">×</button>
-    <div class="bubble-name">${member.name}</div>
-    <div class="bubble-relation">${member.relation}</div>
-    ${member.birthYear ? `<div class="bubble-year">Born ${member.birthYear}</div>` : ''}
+    ${member.photoURL ? `<img src="${member.photoURL}" class="bubble-photo" alt="${member.name}" />` : ''}
+    <div class="bubble-content">
+      <div class="bubble-name">${member.name}</div>
+      <div class="bubble-relation">${member.relation}</div>
+      ${member.birthYear ? `<div class="bubble-year">Born ${member.birthYear}</div>` : ''}
+    </div>
   `;
+
 
   // Delete functionality
   bubble.querySelector('.bubble-delete').addEventListener('click', async (e) => {
